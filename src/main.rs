@@ -10,7 +10,7 @@ type Context<'a> = poise::Context<'a, Data, Error>;
 async fn main() {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![commands::todaysweather()],
+            commands: vec![commands::todays_weather()],
             ..Default::default()
         })
         .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))

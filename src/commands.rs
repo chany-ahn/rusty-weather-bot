@@ -16,13 +16,13 @@ impl fmt::Display for EnvVariableError {
 }
 
 #[poise::command(prefix_command, track_edits, slash_command)]
-pub async fn todaysweather(ctx: Context<'_>, city: String) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+pub async fn todays_weather(ctx: Context<'_>, city: String) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let weather_api_env_var = env::var("WEATHER_API_KEY");
     let weather_api_controller;  
 
     match weather_api_env_var {
         Ok(key) => {
-            weather_api_controller = WeatherApiController::new(&key);
+            weather_api_controller = CurrentWeatherController::new(&key, &city);
         },
         Err(e) => {
             println!("Ran into error: {e}. Failed to get the WEATHER_API_KEY. Did you set it properly?");
@@ -30,10 +30,15 @@ pub async fn todaysweather(ctx: Context<'_>, city: String) -> Result<(), Box<dyn
         }
     }
 
-    let current_weather = weather_api_controller.get_current_weather(&city).await?;
+    let current_weather = weather_api_controller.get_weather().await?;
     
-    ctx.say(current_weather.display_weather()).await?;
+    ctx.say(current_weather.display_weather_info()).await?;
 
     Ok(())
 }
 
+#[poise::command(prefix_command, track_edits, slash_command)]
+pub async fn weekly_weather(ctx: Context<'_>, city: String) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+     
+    Ok(())
+}
