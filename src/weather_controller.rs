@@ -74,7 +74,7 @@ Temp: {}, Feels Like: {}
     }
 }
 
-struct ApiUtils {}
+pub struct ApiUtils {}
 
 impl ApiUtils {
     pub async fn send_request(req_url: &str) -> Result<String> {
