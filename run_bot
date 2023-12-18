@@ -1,0 +1,5 @@
+#!/bin/bash
+export WEATHER_API_KEY="ADD WEATHER API KEY HERE" 
+export DISCORD_TOKEN="ADD DISCORD BOT TOKEN HERE"
+
+cargo run
