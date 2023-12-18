@@ -115,7 +115,7 @@ impl PartialEq for WeatherInfo {
 impl WeatherInfo {
     pub fn display_weather_info(&self) -> String {
         let mut display_string = format!(
-            "#{}\n##Today:\nTemp: {}, Feels Like: {}",
+            "# {}\n## Today:\nTemp: {}, Feels Like: {}\n",
             self.location.get_formatted_location(), 
             self.current.temp_c,
             self.current.feelslike_c,
@@ -123,9 +123,9 @@ impl WeatherInfo {
         
         if let Some(forecast) = &self.forecast {
             let forcast_days = &forecast.forecastday;
-            display_string.push_str("##Next 6 days:\n");
+            display_string.push_str("## Next 6 days:\n");
             for day in forcast_days {
-                let cur_day = format!("* {}\nMax Temp: {}\nMin Temp: {}\nProjected Precipition: {}", 
+                let cur_day = format!("* {}\n * Max Temp: {}\n * Min Temp: {}\n * Projected Precipition: {}\n", 
                     day.date, 
                     day.day.maxtemp_c, 
                     day.day.mintemp_c, 

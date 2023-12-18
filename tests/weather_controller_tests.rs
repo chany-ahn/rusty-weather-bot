@@ -253,7 +253,7 @@ mod weather_info_tests {
         match parsed_weather_info {
             Ok(weather_info) => {
                 let expected_weather_display_str = format!(
-            "#Toronto, Ontario, Canada\n##Today:\nTemp: 5.1, Feels Like: 0.9");
+            "# Toronto, Ontario, Canada\n## Today:\nTemp: 5.1, Feels Like: 0.9\n");
                 assert_eq!(expected_weather_display_str, weather_info.display_weather_info());
             },
             Err(e) => {
