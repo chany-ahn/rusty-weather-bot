@@ -16,6 +16,12 @@ pub struct Location {
     localtime: String 
 }
 
+impl PartialEq for Location {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name && self.region == other.region && self.country == other.country
+    }
+}
+
 impl Location {
     pub fn get_formatted_location(&self) -> String {
         format!("{}, {}, {}", self.name, self.region, self.country)
@@ -29,6 +35,12 @@ pub struct Condition {
     icon: String,
 }
 
+impl PartialEq for Condition {
+    fn eq(&self, other: &Self) -> bool {
+        self.text == other.text && self.icon == other.icon
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CurrentWeather {
     temp_c: f32,
@@ -39,11 +51,30 @@ pub struct CurrentWeather {
     condition: Condition,
 }
 
+impl PartialEq for CurrentWeather {
+    fn eq(&self, other: &Self) -> bool {
+        self.temp_c == other.temp_c &&
+        self.feelslike_c == other.feelslike_c &&
+        self.wind_kph == other.wind_kph &&
+        self.wind_dir == other.wind_dir &&
+        self.precip_mm == other.precip_mm &&
+        self.condition == other.condition
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ForecastDayWeather {
     maxtemp_c: f32,
     mintemp_c: f32,
     totalprecip_mm: f32,
+}
+
+impl PartialEq for ForecastDayWeather {
+    fn eq(&self, other: &Self) -> bool {
+        self.maxtemp_c == other.maxtemp_c &&
+        self.mintemp_c == other.mintemp_c &&
+        self.totalprecip_mm == other.totalprecip_mm
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -54,6 +85,14 @@ pub struct ForecastDay {
 
 }
 
+impl PartialEq for ForecastDay {
+    fn eq(&self, other: &Self) -> bool {
+        self.date == other.date &&
+        self.day == other.day &&
+        self.condition == other.condition 
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WeatherInfo {
     location: Location,
@@ -61,7 +100,16 @@ pub struct WeatherInfo {
     forecast: Option<Vec<ForecastDay>>
 }
 
+impl PartialEq for WeatherInfo {
+    fn eq(&self, other: &Self) -> bool {
+        self.location == other.location &&
+        self.current == other.current &&
+        self.forecast == other.forecast
+    }
+}
+
 impl WeatherInfo {
+    //TODO: Add forecast implementation as well!
     pub fn display_weather_info(&self) -> String {
         format!(
             r#"{}
@@ -105,29 +153,30 @@ impl fmt::Display for ApiError {
     }
 }
 
-const BASE_URL: &str = "http://api.weatherapi.com/v1";
 
 #[async_trait]
 pub trait WeatherController{
-    fn new(api_key: &str, city_name: &str) -> Self;
+    fn new(base_url: &str, api_key: &str, city_name: &str) -> Self;
     async fn get_weather(&self) -> Result<WeatherInfo>;
 }
 
 pub struct CurrentWeatherController {
+    base_url: String,
     api_key: String,
     city_name: String,
 }
 
+
 #[async_trait]
 impl WeatherController for CurrentWeatherController {
 
-    fn new(api_key: &str, city_name: &str) -> CurrentWeatherController {
-        CurrentWeatherController { api_key: String::from(api_key), city_name: String::from(city_name) } 
-    } 
-
+    fn new(base_url: &str, api_key: &str, city_name: &str) -> CurrentWeatherController {
+        CurrentWeatherController { base_url: String::from(base_url), api_key: String::from(api_key), city_name: String::from(city_name) } 
+    }
 
     async fn get_weather(&self) -> Result<WeatherInfo> {
-        let req_url = format!("{}/{}?key={}&q={}&aqi=yes", BASE_URL, "current.json", self.api_key, self.city_name);
+        let req_url = format!("{}{}?key={}&q={}&aqi=yes", self.base_url, "/current.json", self.api_key, self.city_name);
+        println!("This is the request_url: {req_url}");
 
         let resp = ApiUtils::send_request(&req_url).await?;
 
@@ -151,6 +200,7 @@ impl WeatherController for CurrentWeatherController {
 }
 
 pub struct WeeklyWeatherController {
+    base_url: String,
     api_key: String,
     city_name: String,
 }
@@ -158,13 +208,13 @@ pub struct WeeklyWeatherController {
 #[async_trait]
 impl WeatherController for WeeklyWeatherController {
 
-    fn new(api_key: &str, city_name: &str) -> WeeklyWeatherController {
-        WeeklyWeatherController { api_key: String::from(api_key), city_name: String::from(city_name) } 
+    fn new(base_url: &str, api_key: &str, city_name: &str) -> WeeklyWeatherController {
+        WeeklyWeatherController { base_url: String::from(base_url), api_key: String::from(api_key), city_name: String::from(city_name) } 
     } 
 
 
     async fn get_weather(&self) -> Result<WeatherInfo> {
-        let req_url = format!("{}/{}?key={}&q={}&aqi=no&days={}&alerts=no", BASE_URL, "forecast.json", self.city_name, self.api_key, 7);
+        let req_url = format!("{}/{}?key={}&q={}&aqi=no&days={}&alerts=no", self.base_url, "forecast.json", self.city_name, self.api_key, 7);
         let resp = ApiUtils::send_request(&req_url).await?;
 
         let parsed_weather_info = serde_json::from_str(&resp);

@@ -1,6 +1,67 @@
 #[cfg(test)]
 mod weather_controller_tests {
+    use weather_controller::{WeatherController,CurrentWeatherController};
+    #[tokio::test]
+    async fn test_get_current_weather() {
+        let body = r#"{
+    "location": {
+        "name": "Toronto",
+        "region": "Ontario",
+        "country": "Canada",
+        "localtime": "2023-11-04 21:39"
+    },
+    "current": {
+        "temp_c": 5.0,
+        "is_day": 0,
+        "condition": {
+            "text": "Partly cloudy",
+            "icon": "//cdn.weatherapi.com/weather/64x64/night/116.png",
+            "code": 1003
+        },
+        "wind_mph": 21.7,
+        "wind_kph": 34.9,
+        "wind_degree": 60,
+        "wind_dir": "ENE",
+        "pressure_mb": 1027.0,
+        "pressure_in": 30.34,
+        "precip_mm": 0.0,
+        "precip_in": 0.0,
+        "humidity": 87,
+        "cloud": 50,
+        "feelslike_c": 0.9,
+        "feelslike_f": 33.7,
+        "gust_mph": 26.2,
+        "gust_kph": 42.1
+    }
+}
+"#;
+        let mut server = mockito::Server::new();
 
+        let url = "/current.json?key=fake_key&q=Toronto&aqi=yes";
+
+        let mock = server
+            .mock("GET", url)
+            .with_status(200)
+            .with_header("content-type", "text/plain")
+            .with_body(body)
+            .create();
+        
+        let weather_controller = CurrentWeatherController::new(&server.url(), "fake_key", "Toronto");
+        let weather_result = weather_controller.get_weather().await;
+
+        mock.assert();
+        
+        let expected = serde_json::from_str::<weather_controller::WeatherInfo>(body);
+        match (expected, weather_result) {
+            (Ok(expected_weather_info), Ok(weather_info)) => {
+                assert_eq!(expected_weather_info, weather_info);
+            },
+            _ => {
+                assert!(false);
+            }
+        }
+
+    }
 }
 
 #[cfg(test)]
@@ -12,7 +73,8 @@ mod api_utils_test {
     "location": {
         "name": "Toronto",
         "region": "Ontario",
-        "country": "Canada"
+        "country": "Canada",
+        "localtime": "2023-11-04 21:39"
     },
     "current": {
         "temp_c": 5.0,

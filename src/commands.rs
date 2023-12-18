@@ -4,6 +4,8 @@ use std::error::Error;
 use std::env;
 use std::fmt;
 
+const WEATHER_API_URL: &str = "http://api.weatherapi.com/v1/";
+
 #[derive(Debug)]
 pub struct EnvVariableError;
 
@@ -22,7 +24,7 @@ pub async fn todays_weather(ctx: Context<'_>, city: String) -> Result<(), Box<dy
 
     match weather_api_env_var {
         Ok(key) => {
-            weather_api_controller = CurrentWeatherController::new(&key, &city);
+            weather_api_controller = CurrentWeatherController::new(WEATHER_API_URL, &key, &city);
         },
         Err(e) => {
             println!("Ran into error: {e}. Failed to get the WEATHER_API_KEY. Did you set it properly?");
