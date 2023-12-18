@@ -67,6 +67,7 @@ pub struct ForecastDayWeather {
     maxtemp_c: f32,
     mintemp_c: f32,
     totalprecip_mm: f32,
+    condition: Condition
 }
 
 impl PartialEq for ForecastDayWeather {
@@ -81,23 +82,26 @@ impl PartialEq for ForecastDayWeather {
 pub struct ForecastDay {
     date: String,
     day: ForecastDayWeather,
-    condition: Condition
 
 }
 
 impl PartialEq for ForecastDay {
     fn eq(&self, other: &Self) -> bool {
         self.date == other.date &&
-        self.day == other.day &&
-        self.condition == other.condition 
+        self.day == other.day 
     }
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct Forecast {
+    forecastday: Vec<ForecastDay>
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WeatherInfo {
     location: Location,
     current: CurrentWeather,
-    forecast: Option<Vec<ForecastDay>>
+    forecast: Option<Forecast>,
 }
 
 impl PartialEq for WeatherInfo {
@@ -109,16 +113,28 @@ impl PartialEq for WeatherInfo {
 }
 
 impl WeatherInfo {
-    //TODO: Add forecast implementation as well!
     pub fn display_weather_info(&self) -> String {
-        format!(
-            r#"{}
-Temp: {}, Feels Like: {}
-        "#,
+        let mut display_string = format!(
+            "#{}\n##Today:\nTemp: {}, Feels Like: {}",
             self.location.get_formatted_location(), 
             self.current.temp_c,
             self.current.feelslike_c,
-        )
+        );
+        
+        if let Some(forecast) = &self.forecast {
+            let forcast_days = &forecast.forecastday;
+            display_string.push_str("##Next 6 days:\n");
+            for day in forcast_days {
+                let cur_day = format!("* {}\nMax Temp: {}\nMin Temp: {}\nProjected Precipition: {}", 
+                    day.date, 
+                    day.day.maxtemp_c, 
+                    day.day.mintemp_c, 
+                    day.day.totalprecip_mm);
+                display_string.push_str(&cur_day);
+            }
+
+        }
+        display_string
     }
 }
 
@@ -214,7 +230,7 @@ impl WeatherController for WeeklyWeatherController {
 
 
     async fn get_weather(&self) -> Result<WeatherInfo> {
-        let req_url = format!("{}/{}?key={}&q={}&aqi=no&days={}&alerts=no", self.base_url, "forecast.json", self.city_name, self.api_key, 7);
+        let req_url = format!("{}{}?key={}&q={}&aqi=no&days={}&alerts=no", self.base_url, "/forecast.json", self.api_key, self.city_name, 7);
         let resp = ApiUtils::send_request(&req_url).await?;
 
         let parsed_weather_info = serde_json::from_str(&resp);
