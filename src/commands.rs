@@ -4,7 +4,7 @@ use std::error::Error;
 use std::env;
 use std::fmt;
 
-const WEATHER_API_URL: &str = "http://api.weatherapi.com/v1/";
+const WEATHER_API_URL: &str = "http://api.weatherapi.com/v1";
 
 #[derive(Debug)]
 pub struct EnvVariableError;
