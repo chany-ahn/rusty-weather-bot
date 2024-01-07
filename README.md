@@ -4,6 +4,11 @@
 
 This Discord Weather Bot, developed in Rust, provides real-time weather updates and weekly forecasts directly in your Discord server. It's designed to offer quick and accurate weather information with an easy-to-use interface by utilizing Discords build in slash commands.
 
+## Features
+
+- Current Weather: Get the latest weather information including temperature, humidity, wind speed, and more for any specified location.
+- Weekly Forecast: Displays weather forecasts for the upcoming week, giving you a comprehensive look at expected conditions.
+
 ## Dependencies
 
 - Rust
@@ -12,9 +17,13 @@ This Discord Weather Bot, developed in Rust, provides real-time weather updates 
 
 ## Installation
 
+- Clone the repository to your local machine.
+- Add your Discord Bot and WeatherAPI token to the `run_bot` file.
+- Use `./run_bot` in your terminal to run the bot.
+
 ## Usage
 
 The currently provided slash commands are:
 
-- `/current_weather CITY_NAME`: Gets the latest weather information for the specified location.
-- `/weekly_weather CITY_NAME`: Outlines the latest weather and the forecasted weather for the next 6 days.
+- `/current_weather CITY_NAME`
+- `/weekly_weather CITY_NAME`
