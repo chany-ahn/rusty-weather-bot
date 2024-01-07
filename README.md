@@ -2,7 +2,7 @@
 
 ## Description
 
-This Discord Weather Bot, developed in Rust, provides real-time weather updates and weekly forecasts directly in your Discord server. It's designed to offer quick and accurate weather information with an easy-to-use interface by utilizing Discords build in slash commands.
+This Discord Weather Bot, developed in Rust, provides real-time weather updates and weekly forecasts directly in your Discord server. It's designed to offer quick and accurate weather information with an easy-to-use interface by utilizing Discord's built in slash commands.
 
 ## Features
 
